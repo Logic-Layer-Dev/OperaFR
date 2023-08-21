@@ -31,11 +31,12 @@ model Folder {
 }
 
 model File {
-  id        Int                @id @default(autoincrement())
-  name      String
-  path      String
-  folderId  Int                @map("folder_id")
-  folder    Folder             @relation(fields: [folderId], references: [id])
+  id         Int                 @id @default(autoincrement())
+  name       String
+  path       String
+  public_url String              @default("")
+  folderId   Int                 @map("folder_id")
+  folder     Folder              @relation(fields: [folderId], references: [id])
 }
 
 model FolderPermission {

@@ -5,6 +5,7 @@ const validationMid = require('../middlewares/validation.mid')
 const asyncHandler = require('../utils/asyncHandler')
 
 module.exports = function(app) {
+    //-- list files
     app.get('/files', [authJwt], asyncHandler(FileController.getFile), [validationMid])
 
     //-- Upload file
@@ -14,4 +15,7 @@ module.exports = function(app) {
         asyncHandler(FileController.postFile), //middleware to handle request
         [validationMid] //middleware to handle code 500
     )
+
+    //-- Render file
+    app.get('/files/:hash', asyncHandler(FileController.getByUrl), [validationMid])
 }

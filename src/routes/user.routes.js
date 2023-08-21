@@ -5,4 +5,5 @@ const asyncHandler = require('../utils/asyncHandler')
 
 module.exports = function(app) {
     app.post('/users', [authMid], asyncHandler(userController.createUser), [validationMid])
+    app.put('/users', [authMid], asyncHandler(userController.editUser), [validationMid])
 }

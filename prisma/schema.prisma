@@ -16,6 +16,7 @@ model User {
   username  String
   password  String
   email     String
+  superuser Boolean            @default(false)
   permissions FolderPermission[]
 }
 

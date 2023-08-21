@@ -12,11 +12,14 @@ datasource db {
 }
 
 model User {
-  id        Int                @id @default(autoincrement())
-  username  String
-  password  String
-  email     String
-  superuser Boolean            @default(false)
+  id             Int                @id @default(autoincrement())
+  username       String
+  password       String
+  email          String
+  api_token      String             @default("")
+  api_expires_at DateTime           @default(now())
+  superuser      Boolean            @default(false)
+  active         Boolean            @default(true)
   permissions FolderPermission[]
 }
 

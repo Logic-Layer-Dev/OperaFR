@@ -40,6 +40,57 @@ class FileController {
         }))
     }
 
+    async deleteFolderPermission(req, res) {
+        let {
+            user_id = null,
+            username = null,
+            folder_id = null,
+        } = req.body
+
+        if(!user_id && !username) return res.status(400).json(defaultResponse(400, 'User id or username is required for locate the user', null))
+        if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
+
+        let have_current_permission = await prisma.user.findFirst({
+            where: { id: req.id },
+            include: {
+                permissions: {
+                    where: {
+                        folderId: folder_id
+                    },
+                    include: {
+                        folder: true
+                    }
+                }
+            }
+        })
+
+        if(
+            !have_current_permission.superuser && 
+            !have_current_permission.permissions[0]?.permission == 'admin'
+        ) return res.status(400).json(defaultResponse(401, 'You dont have permission to give permission to this folder', null))
+
+        //-- Remove permission from user
+        let where_clause = {
+            id: user_id ? user_id : undefined,
+            username: username ? username : undefined
+        }
+
+        const user = await prisma.user.findFirst({
+            where: where_clause,
+        });
+
+        if(!user) return res.status(400).json(defaultResponse(400, 'User not found', null))
+
+        await prisma.folderPermission.deleteMany({
+            where: {
+                userId: user.id,
+                folderId: folder_id
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, 'successfully removed permission from user', null))
+    }
+
     async giveFolderPermission(req, res) {
         let {
             user_id = null,
@@ -103,6 +154,45 @@ class FileController {
         }) 
 
         return res.status(200).json(defaultResponse(200, 'successfully authorized user', null))
+    }
+
+    async generateApiToken (req, res) {
+        let user_id = req.id
+        let days_expiration = req.body.days_expiration
+
+        if(!days_expiration) return res.status(400).json(defaultResponse(400, 'Days expiration is required', null))
+        if(days_expiration < 0) return res.status(400).json(defaultResponse(400, 'Days expiration must be greater than 0', null))
+        
+        let expiration_date = new Date() 
+        
+        if(days_expiration == 'never'){
+            expiration_date.setFullYear(2100)
+        } else {
+            expiration_date.setDate(expiration_date.getDate() + days_expiration)
+        }
+
+        let user = await prisma.user.findFirst({
+            where: { id: user_id }
+        })
+
+        let token = jwt.sign({ 
+            id: user.id,
+            username: user.username,
+            expiration_date: expiration_date
+        }, process.env.JWT_SECRET);
+
+        await prisma.user.update({
+            where: { id: user_id },
+            data: {
+                api_token: token,
+                api_expires_at: expiration_date
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, 'Token generated successfully', {
+            token,
+            expiration_date
+        }))
     }
 }
 

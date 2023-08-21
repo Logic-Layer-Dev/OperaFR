@@ -1,6 +1,7 @@
 const defaultResponse = require("../utils/defaultResponse");
 const prisma = require("../../config/prisma.config");
 const path = require('path')
+const sha256 = require('sha256')
 
 class FileController {
     async getFile(req, res) {
@@ -59,15 +60,9 @@ class FileController {
                 }
             })
 
-            if(!files) return res.status(404).json(defaultResponse(404, `Files not found`, null))
+            if(!files) return res.status(404).json(defaultResponse(404, `Files not found in this folder`, null))
 
-            if(render){
-                const file_path = path.join(__dirname, '..', '..', 'uploads', file.path)
-
-                return res.sendFile(file_path)
-            } else {
-                return res.status(200).json(defaultResponse(200, `File found`, file))
-            }
+            return res.status(200).json(defaultResponse(200, `Files found`, files))
         }
 
         return res.status(400).json(defaultResponse(400, `You need to use file_name and folder_id when searching by file_name`, null))
@@ -92,6 +87,7 @@ class FileController {
         let originalName = req.file.originalname
         let filename = req.file.filename
         let logic_path = req.body.folder_id
+        let have_public_url = req.body.public_url == 1 ? true : false 
 
         if(!filename) return res.status(400).json(defaultResponse(400, `File is required`, null))
         if(!logic_path) return res.status(400).json(defaultResponse(400, `Folder is required`, null))
@@ -111,11 +107,17 @@ class FileController {
             originalName = `${file_name}-${Date.now()}.${current_extension}`
         }
 
+        let public_url = ""
+        if(have_public_url){
+            public_url = sha256(Date.now().toString() + "_" + filename)
+        }
+
         let file_insert = await prisma.file.create({
             data: {
                 name: originalName,
                 path: filename,
-                folderId: parseInt(logic_path)
+                folderId: parseInt(logic_path),
+                public_url: public_url
             }
         })
 

@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const defaultResponse = require("../utils/defaultResponse");
 const prisma = require("../../config/prisma.config");
 const sha256 = require("sha256");
@@ -25,10 +27,12 @@ class FileController {
         });
         
         if(user.length == 0) return res.status(400).json(defaultResponse(400, 'Username or password is incorrect', null))
+        
+        console.log(user[0])
 
         const token = jwt.sign({ 
-            id: user.id,
-            username: user.username,
+            id: user[0].id,
+            username: user[0].username,
         }, process.env.JWT_SECRET, {
             expiresIn: 28800 // expires in 8 hours
         });

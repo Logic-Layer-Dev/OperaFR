@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 app.set('trust proxy', true);
 app.use(cors({
-    origin: ['*'],
+    origin: ['http://localhost'],
     methods: ['GET', 'POST', 'OPTIONS', 'DELETE', 'PUT', 'PATCH'],
     credentials: true,
     headers: ['*']

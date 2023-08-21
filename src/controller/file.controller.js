@@ -6,6 +6,7 @@ class FileController {
     }
 
     async postFile(req, res) {
+        // let filename = req.file.filename
         return res.status(200).json(defaultResponse(200, `File uploaded successfully`, null))
     }
 }

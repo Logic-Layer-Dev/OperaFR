@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int                @id @default(autoincrement())
+  username  String
+  password  String
+  email     String
+  permissions FolderPermission[]
+}
+
+model Folder {
+  id        Int                @id @default(autoincrement())
+  name      String
+  parentFolderId Int?          @map("parent_folder_id")
+  parentFolder   Folder?       @relation("FolderToFolder", fields: [parentFolderId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children       Folder[]      @relation("FolderToFolder")
+  files          File[]
+  permissions    FolderPermission[]
+}
+
+model File {
+  id        Int                @id @default(autoincrement())
+  name      String
+  path      String
+  folderId  Int                @map("folder_id")
+  folder    Folder             @relation(fields: [folderId], references: [id])
+}
+
+model FolderPermission {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  folderId    Int      @map("folder_id")
+  permission  String
+  user        User     @relation(fields: [userId], references: [id])
+  folder      Folder   @relation(fields: [folderId], references: [id])
+}

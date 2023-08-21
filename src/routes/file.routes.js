@@ -16,6 +16,10 @@ module.exports = function(app) {
         [validationMid] //middleware to handle code 500
     )
 
+    //-- Delete file
+    app.delete('/files', [authJwt], asyncHandler(FileController.deleteFile), [validationMid])
+
     //-- Render file
     app.get('/files/:hash', asyncHandler(FileController.getByUrl), [validationMid])
+
 }

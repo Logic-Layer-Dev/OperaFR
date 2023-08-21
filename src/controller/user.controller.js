@@ -14,6 +14,14 @@ class UserController {
         if(!username) return res.status(400).json(defaultResponse(400, 'Username is required', null))
         if(!email) return res.status(400).json(defaultResponse(400, 'Email is required', null))
         
+        const is_super_user = await prisma.user.findFirst({
+            where: {
+                id: req.id,
+            }
+        })
+
+        if(!is_super_user?.superuser) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+
         const users = await prisma.user.findMany({
             where: {
                 OR: [

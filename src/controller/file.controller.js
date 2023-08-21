@@ -1,9 +1,66 @@
 const defaultResponse = require("../utils/defaultResponse");
 const prisma = require("../../config/prisma.config");
 const path = require('path')
-const sha256 = require('sha256')
+const sha256 = require('sha256');
+const removeFile = require("../utils/removeFile");
 
 class FileController {
+    async deleteFile(req, res) {
+        let {
+            file_id = null,
+            file_name = null,
+            folder_id = null
+        } = req.query
+        
+        if(!file_id && !file_name && !folder_id) return res.status(400).json(defaultResponse(400, `file_id, file_name or folder_id is required`, null))
+
+        if(file_id){
+            const file = await prisma.file.findFirst({
+                where: {
+                    id: parseInt(file_id)
+                }
+            })
+
+            if(!file) return res.status(404).json(defaultResponse(404, `File not found`, null))
+
+            const delete_file = await prisma.file.delete({
+                where: {
+                    id: parseInt(file_id)
+                }
+            })
+            removeFile(file.path)
+
+            return res.status(200).json(defaultResponse(200, `File deleted`, delete_file))
+        }
+
+        if(file_name && folder_id){
+            const file = await prisma.file.findFirst({
+                where: {
+                    AND:[{
+                        name: file_name,
+                        folderId: parseInt(folder_id)
+                    }]
+                }
+            })
+
+            if(!file) return res.status(404).json(defaultResponse(404, `File not found`, null))
+
+            const delete_file = await prisma.file.delete({
+                where: {
+                    AND:[{
+                        name: file_name,
+                        folderId: parseInt(folder_id)
+                    }]
+                }
+            })
+            removeFile(file.path)
+            
+            return res.status(200).json(defaultResponse(200, `File deleted`, delete_file))
+        }
+
+        return res.status(400).json(defaultResponse(400, `You need to use file_name and folder_id when searching by file_name`, null))
+    }
+
     async getFile(req, res) {
         let {
             file_id = null,

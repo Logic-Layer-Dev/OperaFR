@@ -19,6 +19,17 @@ class FolderController {
             delete data.parentFolderId
         }
 
+        const exist_folder = await prisma.folder.findFirst({
+            where: {
+                AND:[{
+                    name: data.name,
+                    parentFolderId: data.parentFolderId ? data.parentFolderId : null
+                }]
+            }
+        })
+
+        if(exist_folder) return res.status(400).json(defaultResponse(400, 'Folder already exist in this folder', null))
+
         const folder = await prisma.folder.create({
             data 
         })

@@ -19,6 +19,12 @@ module.exports = function(app) {
     //-- Delete file
     app.delete('/files', [authJwt], asyncHandler(FileController.deleteFile), [validationMid])
 
+    //-- Create public url
+    app.post('/files/public_url', [authJwt], asyncHandler(FileController.createPublicUrl), [validationMid])
+
+    //-- Delete public url
+    app.delete('/files/public_url', [authJwt], asyncHandler(FileController.deletePublicUrl), [validationMid])
+
     //-- Render file
     app.get('/files/:hash', asyncHandler(FileController.getByUrl), [validationMid])
 

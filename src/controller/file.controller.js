@@ -203,6 +203,62 @@ class FileController {
 
         return res.status(200).json(defaultResponse(200, `File uploaded successfully`, file_insert))
     }
+
+    async createPublicUrl(req, res) {
+        let {
+            file_id = null
+        } = req.body
+
+        if(!file_id) return res.status(400).json(defaultResponse(400, `file_id is required`, null))
+
+        let file = await prisma.file.findFirst({
+            where: {
+                id: parseInt(file_id)
+            }
+        })
+
+        if(!file) return res.status(404).json(defaultResponse(404, `File not found`, null))
+
+        let public_url = sha256(Date.now().toString() + "_" + file.name)
+
+        let file_update = await prisma.file.update({
+            where: {
+                id: parseInt(file_id)
+            },
+            data: {
+                public_url: public_url
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, `Public url created`, file_update))
+    }
+
+    async deletePublicUrl(req, res) {
+        let {
+            file_id = null
+        } = req.body
+
+        if(!file_id) return res.status(400).json(defaultResponse(400, `file_id is required`, null))
+
+        let file = await prisma.file.findFirst({
+            where: {
+                id: parseInt(file_id)
+            }
+        })
+
+        if(!file) return res.status(404).json(defaultResponse(404, `File not found`, null))
+
+        let file_update = await prisma.file.update({
+            where: {
+                id: parseInt(file_id)
+            },
+            data: {
+                public_url: ""
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, `Public url deleted`, file_update))
+    }
 }
 
 module.exports = new FileController()

@@ -67,6 +67,8 @@ class FileController {
     }
 
     async getFile(req, res) {
+        throw new Error('Not implemented')
+
         let {
             file_id = null,
             file_name = null,

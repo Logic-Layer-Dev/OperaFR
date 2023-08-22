@@ -2,7 +2,8 @@ const defaultResponse = require("../utils/defaultResponse");
 const prisma = require("../../config/prisma.config");
 const checkFolderPermission = require("../utils/checkFolderPermission");
 const fs = require('fs')
-const path = require('path')
+const path = require('path');
+const createLog = require("../utils/createLog");
 
 class FolderController {
     async insertFolder(req, res) {
@@ -90,8 +91,40 @@ class FolderController {
                 id: folder_id
             }
         })
+    
+        await createLog(req.id, 'delete_folder', { 
+            folder_id: folder_id, 
+            files: files_to_delete
+        })
 
         return res.status(200).json(defaultResponse(200, 'Folder deleted successfully', delete_folder))
+    }
+
+    async renameFolder(req, res) {
+        let { folder_id, name = null } = req.body
+
+        if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
+        if(!name) return res.status(400).json(defaultResponse(400, 'Name is required for make the rename', null))
+
+        const folder = await prisma.folder.findFirst({
+            where: {
+                id: folder_id
+            }
+        })
+
+        if(!folder) return res.status(400).json(defaultResponse(400, 'Folder not found', null))
+        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+
+        const exist_folder = await prisma.folder.update({
+            where: {
+                id: folder_id
+            },
+            data: {
+                name: name
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, 'Folder renamed successfully', exist_folder))
     }
 }
 

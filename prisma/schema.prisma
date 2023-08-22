@@ -21,6 +21,7 @@ model User {
   superuser      Boolean            @default(false)
   active         Boolean            @default(true)
   permissions FolderPermission[]
+  logs Logs[]
 }
 
 model Folder {
@@ -49,4 +50,12 @@ model FolderPermission {
   permission  String
   user        User     @relation(fields: [userId], references: [id])
   folder      Folder   @relation(fields: [folderId], references: [id])
+}
+
+model Logs {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  action    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }

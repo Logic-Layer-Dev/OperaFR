@@ -6,4 +6,5 @@ const asyncHandler = require('../utils/asyncHandler')
 module.exports = function(app) {
     app.post('/folders', [authJwt], asyncHandler(folderController.insertFolder), [validationMid])
     app.delete('/folders', [authJwt], asyncHandler(folderController.deleteFolder), [validationMid])
+    app.post('/folders/rename', [authJwt], asyncHandler(folderController.renameFolder), [validationMid])
 }

@@ -4,6 +4,7 @@ const defaultResponse = require("../utils/defaultResponse");
 const prisma = require("../../config/prisma.config");
 const sha256 = require("sha256");
 const jwt = require("jsonwebtoken");
+const checkFolderPermission = require("../utils/checkFolderPermission");
 
 class FileController {
     async login(req, res) {
@@ -49,26 +50,8 @@ class FileController {
 
         if(!user_id && !username) return res.status(400).json(defaultResponse(400, 'User id or username is required for locate the user', null))
         if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
-
-        let have_current_permission = await prisma.user.findFirst({
-            where: { id: req.id },
-            include: {
-                permissions: {
-                    where: {
-                        folderId: folder_id
-                    },
-                    include: {
-                        folder: true
-                    }
-                }
-            }
-        })
-
-        if(
-            !have_current_permission.superuser && 
-            !have_current_permission.permissions[0]?.permission == 'admin'
-        ) return res.status(400).json(defaultResponse(401, 'You dont have permission to give permission to this folder', null))
-
+        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        
         //-- Remove permission from user
         let where_clause = {
             id: user_id ? user_id : undefined,
@@ -101,27 +84,9 @@ class FileController {
 
         if(!user_id && !username) return res.status(400).json(defaultResponse(400, 'User id or username is required for locate the user', null))
         if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
-        if(permission != 'read' && permission != 'write' && permission != 'admin') return res.status(400).json(defaultResponse(400, 'Permission must be read, write or admin', null))
-
-        let have_current_permission = await prisma.user.findFirst({
-            where: { id: req.id },
-            include: {
-                permissions: {
-                    where: {
-                        folderId: folder_id
-                    },
-                    include: {
-                        folder: true
-                    }
-                }
-            }
-        })
-
-        if(
-            !have_current_permission.superuser && 
-            !have_current_permission.permissions[0]?.permission == 'admin'
-        ) return res.status(400).json(defaultResponse(401, 'You dont have permission to give permission to this folder', null))
-
+        if(permission != 'read' && permission != 'write' && permission != 'admin') return res.status(400).json(defaultResponse(400, 'Permission for user must be read, write or admin', null))
+        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        
         //-- Check if user exists and have the permission
         let where_clause = {
             id: user_id ? user_id : undefined,

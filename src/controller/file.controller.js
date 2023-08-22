@@ -3,6 +3,7 @@ const prisma = require("../../config/prisma.config");
 const path = require('path')
 const sha256 = require('sha256');
 const removeFile = require("../utils/removeFile");
+const fs = require('fs')
 
 class FileController {
     async deleteFile(req, res) {
@@ -148,6 +149,23 @@ class FileController {
 
         if(!filename) return res.status(400).json(defaultResponse(400, `File is required`, null))
         if(!logic_path) return res.status(400).json(defaultResponse(400, `Folder is required`, null))
+
+        let folder_exists = await prisma.folder.findFirst({
+            where: {
+                id: parseInt(logic_path)
+            }
+        })
+
+        if(!folder_exists) {
+            fs.unlink(path.join(__dirname, '..', '..', 'uploads', filename), (err) => {
+                if (err) {
+                    console.error(`[DELETE FILE OUT OF PRISMA: ${filename}] ${err}]`)
+                    return
+                }
+            })
+
+            return res.status(404).json(defaultResponse(404, `Folder not found`, null))
+        }
 
         let same_name_exists = await prisma.file.findFirst({
             where: {

@@ -1,6 +1,6 @@
 module.exports = function(status, message, content) {
     return {
-        success: status,
+        status: status,
         message: message,
         content: content
     }

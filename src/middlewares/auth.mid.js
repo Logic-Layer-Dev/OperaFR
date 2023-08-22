@@ -18,6 +18,8 @@ module.exports = async (req, res, next) => {
     })
 
     if(is_api_token){
+        if(!is_api_token.active) return res.status(401).send(defaultResponse(401, 'User is inactive.', null))
+
         let limit = is_api_token.api_expires_at
         let now = new Date()
 

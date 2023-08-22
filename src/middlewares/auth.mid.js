@@ -28,10 +28,18 @@ module.exports = async (req, res, next) => {
         }
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err){
             return res.status(401).send(defaultResponse(401, 'Token not valid.', null))
         };
+
+        let user_active = await prisma.user.findFirst({
+            where: {
+                id: decoded.id
+            }
+        })
+
+        if(!user_active.active) return res.status(401).send(defaultResponse(401, 'User is inactive.', null))
 
         req.username = decoded.username;
         req.id = decoded.id;

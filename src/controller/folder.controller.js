@@ -6,6 +6,36 @@ const path = require('path');
 const createLog = require("../utils/createLog");
 
 class FolderController {
+    async getFolders(req, res) {
+        let {
+            folder_id = null,
+            folder_name = null,
+            parent_id = null
+        } = req.query
+
+        if(!folder_id && !folder_name && !parent_id) {
+            let all_folders = await prisma.folder.findMany()
+
+            return res.status(200).json(defaultResponse(200, 'Folder(s) found', all_folders))
+        }
+
+        let where_data = {
+            id: folder_id ? parseInt(folder_id) : undefined,
+            name: folder_name ? folder_name : undefined,
+            parentFolderId: parent_id ? parent_id == 'root' ?  null : parseInt(parent_id) : undefined
+        }
+
+        let folders = await prisma.folder.findMany({
+            where: {
+                AND:[where_data]
+            }
+        })
+
+        if(folders.length == 0) return res.status(404).json(defaultResponse(404, 'Folder(s) not found', null))
+
+        return res.status(200).json(defaultResponse(200, 'Folder(s) found', folders))
+    }
+
     async insertFolder(req, res) {
         let {
             name,

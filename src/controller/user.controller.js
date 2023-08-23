@@ -54,13 +54,13 @@ class UserController {
 
     async editUser(req, res) {
         let {
-            user_id,
+            username,
             superuser = null,
             email = null,
-            active = null,
+            active = null
         } = req.body
 
-        if(!user_id) return res.status(400).json(defaultResponse(400, 'User id is required', null))
+        if(!username) return res.status(400).json(defaultResponse(400, 'User id is required', null))
 
         const is_super_user = await prisma.user.findFirst({
             where: {
@@ -72,7 +72,7 @@ class UserController {
 
         let user = await prisma.user.findFirst({
             where: {
-                id: user_id
+                username: username
             }
         })
 
@@ -96,7 +96,7 @@ class UserController {
 
         let user_updated = await prisma.user.update({
             where: {
-                id: user_id
+                username: username
             },
             data
         })

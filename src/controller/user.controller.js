@@ -52,12 +52,35 @@ class UserController {
         }))
     }
 
+    async getUsers(req, res) {
+        const is_super_user = await prisma.user.findFirst({
+            where: {
+                id: req.id,
+            }
+        })
+
+        if(!is_super_user?.superuser) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+
+        const users = await prisma.user.findMany({
+            select: {
+                username: true,
+                email: true,
+                api_token: true,
+                superuser: true,
+                active: true
+            }
+        })
+
+        return res.status(200).json(defaultResponse(200, 'Users listed', users))
+    }
+
     async editUser(req, res) {
         let {
             username,
             superuser = null,
             email = null,
-            active = null
+            active = null,
+            password = null
         } = req.body
 
         if(!username) return res.status(400).json(defaultResponse(400, 'User id is required', null))
@@ -83,6 +106,10 @@ class UserController {
         if(superuser != null) data.superuser = superuser == 1 ? true : false
         if(email != null) data.email = email
         if(active != null) data.active = active == 1 ? true : false
+        if(password != null) {
+            let sha256_pass = sha256(password)
+            data.password = sha256_pass
+        }
 
         if(email != null){
             let check_email_exists = await prisma.user.findFirst({

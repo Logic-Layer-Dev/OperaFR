@@ -39,6 +39,7 @@ module.exports = async (req, res, next) => {
             }
         })
 
+        if(!user_active) return res.status(401).send(defaultResponse(401, 'Current user not found. Go to login route and reauth', null))
         if(!user_active.active) return res.status(401).send(defaultResponse(401, 'User is inactive.', null))
 
         req.username = decoded.username;

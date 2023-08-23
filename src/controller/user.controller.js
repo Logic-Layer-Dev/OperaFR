@@ -94,18 +94,26 @@ class UserController {
             if(check_email_exists) return res.status(400).json(defaultResponse(400, 'Email already exists', null))
         }
 
-        let user_updated = await prisma.user.update({
+        let user_updated = await prisma.user.updateMany({
             where: {
                 username: username
             },
             data
         })
 
+        if(user_updated.count == 0) return res.status(400).json(defaultResponse(400, 'User not found', null))
+
+        let user_att = await prisma.user.findFirst({
+            where: {
+                username: username
+            }
+        })
+
         return res.status(200).json(defaultResponse(200, 'User updated successfully', {
-            username: user_updated.username,
-            email: user_updated.email,
-            superuser: user_updated.superuser,
-            active: user_updated.active
+            username: user_att.username,
+            email: user_att.email,
+            superuser: user_att.superuser,
+            active: user_att.active
         }))
     }
 }

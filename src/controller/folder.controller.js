@@ -14,8 +14,9 @@ class FolderController {
         } = req.query
 
         if(!folder_id && !folder_name && !parent_id) {
-            let all_folders = await prisma.folder.findMany()
+            if(!await checkFolderPermission(req.id, 'root', 'read_folder')) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
 
+            let all_folders = await prisma.folder.findMany()
             return res.status(200).json(defaultResponse(200, 'Folder(s) found', all_folders))
         }
 
@@ -31,9 +32,29 @@ class FolderController {
             }
         })
 
-        if(folders.length == 0) return res.status(404).json(defaultResponse(404, 'Folder(s) not found', null))
+        let my_folders = await prisma.folderPermission.findMany({
+            where: {
+                userId: req.id
+            },
+            include: {
+                folder: true
+            }
+        })
 
-        return res.status(200).json(defaultResponse(200, 'Folder(s) found', folders))
+        let permission_folders = []
+        if(my_folders.length > 0){
+            folders.forEach(all_folder => {
+                my_folders.forEach(my_folder => {
+                    if(all_folder.id == my_folder.folderId){
+                        permission_folders.push(all_folder)
+                    }
+                })
+            })
+        }
+
+        if(permission_folders.length == 0) return res.status(404).json(defaultResponse(404, 'Folder(s) not found', null))
+
+        return res.status(200).json(defaultResponse(200, 'Folder(s) found', permission_folders))
     }
 
     async insertFolder(req, res) {
@@ -83,7 +104,7 @@ class FolderController {
         })
 
         if(!folder) return res.status(400).json(defaultResponse(400, 'Folder not found', null))
-        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        if(!await checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
 
         await prisma.folderPermission.deleteMany({
             where: {
@@ -143,7 +164,7 @@ class FolderController {
         })
 
         if(!folder) return res.status(400).json(defaultResponse(400, 'Folder not found', null))
-        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        if(!await checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
 
         const exist_folder = await prisma.folder.update({
             where: {

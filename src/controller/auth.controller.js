@@ -50,7 +50,7 @@ class FileController {
 
         if(!user_id && !username) return res.status(400).json(defaultResponse(400, 'User id or username is required for locate the user', null))
         if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
-        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        if(!await checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
         
         //-- Remove permission from user
         let where_clause = {
@@ -85,7 +85,7 @@ class FileController {
         if(!user_id && !username) return res.status(400).json(defaultResponse(400, 'User id or username is required for locate the user', null))
         if(!folder_id) return res.status(400).json(defaultResponse(400, 'Folder id is required', null))
         if(permission != 'read' && permission != 'write' && permission != 'admin') return res.status(400).json(defaultResponse(400, 'Permission for user must be read, write or admin', null))
-        if(!checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
+        if(!await checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
         
         //-- Check if user exists and have the permission
         let where_clause = {

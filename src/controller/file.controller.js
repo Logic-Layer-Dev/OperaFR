@@ -153,7 +153,7 @@ class FileController {
 
         if(!filename) return res.status(400).json(defaultResponse(400, `File is required`, null))
         if(!logic_path) return res.status(400).json(defaultResponse(400, `Folder is required`, null))
-        if(!checkFolderPermission(req.id, logic_path, 'insert_file')) return res.status(401).json(defaultResponse(401, `Unauthorized`, null))
+        if(!await checkFolderPermission(req.id, logic_path, 'insert_file')) return res.status(401).json(defaultResponse(401, `Unauthorized`, null))
 
         let folder_exists = await prisma.folder.findFirst({
             where: {

@@ -131,6 +131,13 @@ class FileController {
     }
 
     async getByUrl(req, res) {
+        let valid_origins = JSON.parse(process.env.VALID_ORIGIN_PUBLIC_URL)
+
+        console.log("Valid origins:", valid_origins)
+        console.log("Request origin:", req.ip)
+
+        if(!valid_origins.includes(req.ip) && !valid_origins.includes(req.headers.host) && !valid_origins.includes("*")) return res.status(401).json(defaultResponse(401, `Unauthorized`, null))
+
         let hash = req.params.hash
 
         let file = await prisma.file.findFirst({

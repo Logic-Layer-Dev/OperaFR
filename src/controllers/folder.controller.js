@@ -164,6 +164,17 @@ class FolderController {
         })
 
         if(!folder) return res.status(400).json(defaultResponse(400, 'Folder not found', null))
+
+        const folder_replicated = await prisma.folder.findFirst({
+            where: {
+                AND:[{
+                    name: name,
+                    parentFolderId: folder.parentFolderId ? folder.parentFolderId : null
+                }]
+            }
+        })
+
+        if(folder_replicated) return res.status(400).json(defaultResponse(400, 'Folder already exist in this folder', null))
         if(!await checkFolderPermission(req.id, folder_id)) return res.status(401).json(defaultResponse(401, 'Unauthorized', null))
 
         const exist_folder = await prisma.folder.update({

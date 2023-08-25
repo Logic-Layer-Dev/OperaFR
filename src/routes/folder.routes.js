@@ -1,4 +1,4 @@
-const folderController = require('../controller/folder.controller')
+const folderController = require('../controllers/folder.controller')
 const authJwt = require('../middlewares/auth.mid')
 const validationMid = require('../middlewares/validation.mid')
 const asyncHandler = require('../utils/asyncHandler')

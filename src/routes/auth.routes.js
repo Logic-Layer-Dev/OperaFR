@@ -1,4 +1,4 @@
-const authController = require('../controller/auth.controller')
+const authController = require('../controllers/auth.controller')
 const authMid = require('../middlewares/auth.mid')
 const validationMid = require('../middlewares/validation.mid')
 const asyncHandler = require('../utils/asyncHandler')

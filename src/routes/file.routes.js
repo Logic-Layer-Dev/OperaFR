@@ -1,4 +1,4 @@
-const FileController = require('../controller/file.controller')
+const FileController = require('../controllers/file.controller')
 const authJwt = require('../middlewares/auth.mid')
 const UploadMiddleware = require('../middlewares/multer.mid')
 const validationMid = require('../middlewares/validation.mid')

@@ -6,7 +6,7 @@ const sha256 = require("sha256");
 const jwt = require("jsonwebtoken");
 const checkFolderPermission = require("../utils/checkFolderPermission");
 
-class FileController {
+class authController {
     async login(req, res) {
         let {
             username,
@@ -161,4 +161,4 @@ class FileController {
     }
 }
 
-module.exports = new FileController()
+module.exports = new authController()

@@ -41,8 +41,12 @@ class FolderController {
             }
         })
 
+        let is_super_user = await checkFolderPermission(req.id, '*', 'superuser')
         let permission_folders = []
-        if(my_folders.length > 0){
+
+        if(is_super_user){
+            permission_folders = folders
+        } else if(my_folders.length > 0 && !is_super_user){
             folders.forEach(all_folder => {
                 my_folders.forEach(my_folder => {
                     if(all_folder.id == my_folder.folderId){

@@ -1,6 +1,16 @@
 const prisma = require('../../config/prisma.config')
 
 module.exports = async function(user_id, folder_id, category = 'manage') {
+    if(category == 'superuser'){
+        let have_current_permission = await prisma.user.findFirst({
+            where: { id: user_id },
+        })
+    
+        if(
+            !have_current_permission.superuser 
+        ) return false
+    }
+    
     if(category == 'manage'){
         let have_current_permission = await prisma.user.findFirst({
             where: { id: user_id },

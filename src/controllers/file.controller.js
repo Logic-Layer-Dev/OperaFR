@@ -133,9 +133,6 @@ class FileController {
     async getByUrl(req, res) {
         let valid_origins = JSON.parse(process.env.VALID_ORIGIN_PUBLIC_URL)
 
-        console.log("Valid origins:", valid_origins)
-        console.log("Request origin:", req.ip)
-
         if(!valid_origins.includes(req.ip) && !valid_origins.includes(req.headers.host) && !valid_origins.includes("*")) return res.status(401).json(defaultResponse(401, `Unauthorized`, null))
 
         let hash = req.params.hash
@@ -155,9 +152,9 @@ class FileController {
     async postFile(req, res) {
         let originalName = req.file.originalname
         let filename = req.file.filename
-        let logic_path = req.body.folder_id
-        let have_public_url = req.body.public_url == 1 ? true : false 
-
+        let logic_path = req.body.folder_id || null
+        let have_public_url = req.body.public_url == 0 ? false : true 
+        
         if(!filename) return res.status(400).json(defaultResponse(400, `File is required`, null))
         if(!logic_path) return res.status(400).json(defaultResponse(400, `Folder is required`, null))
         if(!await checkFolderPermission(req.id, logic_path, 'insert_file')) return res.status(401).json(defaultResponse(401, `Unauthorized`, null))

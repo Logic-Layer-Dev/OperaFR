@@ -1,6 +1,7 @@
 const FileController = require('../controllers/file.controller')
 const authJwt = require('../middlewares/auth.mid')
 const UploadMiddleware = require('../middlewares/multer.mid')
+const octetMid = require('../middlewares/octet.mid')
 const validationMid = require('../middlewares/validation.mid')
 const asyncHandler = require('../utils/asyncHandler')
 
@@ -11,7 +12,8 @@ module.exports = function(app) {
     //-- Upload file
     app.post('/files', 
         [authJwt],
-        UploadMiddleware.single('file'), //middleware to upload file
+        [octetMid], //middleware to handle octet-stream
+        UploadMiddleware.single('file'), //middleware to upload file by form-data
         asyncHandler(FileController.postFile), //middleware to handle request
         [validationMid] //middleware to handle code 500
     )

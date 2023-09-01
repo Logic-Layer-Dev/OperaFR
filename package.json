@@ -1,6 +1,6 @@
 {
   "name": "opera",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "description": "Binary file management system",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "Carlos Giongo",
   "repository": {
     "type": "git",
-    "url": "https://github.com/carlosgiongo/OperaFR"
+    "url": "https://github.com/Logic-Layer-Dev/OperaFR"
   },
   "license": "ISC",
   "dependencies": {

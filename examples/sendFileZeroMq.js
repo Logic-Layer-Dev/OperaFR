@@ -35,7 +35,7 @@ async function sendFile(filePath) {
         const [reply] = await reqSock.receive();
         const replyData = JSON.parse(reply.toString());
 
-        if (replyData.status === "ok") {
+        if (replyData.status === 201) {
           systemFilename = replyData.system_filename;
           console.log("Name received:", systemFilename);
         } else {
@@ -77,5 +77,5 @@ async function sendFile(filePath) {
   }
 }
 
-const filePath = "<name>.pdf";
+const filePath = "LICENSE.md";
 sendFile(filePath);

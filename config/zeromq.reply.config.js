@@ -1,16 +1,22 @@
+require("dotenv").config();
+
 const zmq = require("zeromq");
 const { v4: uuidv4 } = require("uuid");
 const fs = require("fs");
 const path = require("path");
+const logger = require("../config/logger.config");
+const FileService = require("../src/services/file.services");
 
 const uploadsDir = "uploads";
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const runZeroMqReply = async () => {
   const repSock = new zmq.Reply();
-  await repSock.bind("tcp://*:5555");
+  await repSock.bind(`tcp://*:${process.env.ZMQ_REPLY_PORT}`);
 
-  console.log("ZeroMQ server (Request-Reply) listening on port 5555...");
+  console.log(
+    `ZeroMQ server (Request-Reply) listening on port ${process.env.ZMQ_REPLY_PORT}...`
+  );
 
   const fileStreams = new Map();
 
@@ -21,22 +27,23 @@ const runZeroMqReply = async () => {
         const { filename } = data;
 
         const uniqueFilename = uuidv4() + path.extname(filename);
-        const filePath = path.join(uploadsDir, uniqueFilename);
-
-        fs.writeFileSync(filePath, "", "utf8");
-
-        fileStreams.set(uniqueFilename, { filePath });
+        const fileResponse = await FileService.uploadFile({
+          file: { originalname: filename, filename: uniqueFilename },
+          body: { folder_id: 1, public_url: 1 }
+        });        
 
         await repSock.send(
           JSON.stringify({
-            status: "ok",
+            status: fileResponse.status,
+            message: fileResponse.message,
             system_filename: uniqueFilename,
           })
         );
       } catch (error) {
+        logger.error(`Error on ZeroMQ Server (Request-Reply): ${error}`);
         await repSock.send(
           JSON.stringify({
-            status: "error",
+            status: 400,
             message: error.message,
           })
         );
@@ -44,6 +51,7 @@ const runZeroMqReply = async () => {
     }
   } catch (error) {
     console.error("Error on ZeroMQ Server (Request-Reply):", error);
+    logger.error(`Error on ZeroMQ Server (Request-Reply): ${error}`);
   } finally {
     repSock.close();
     console.log("ZeroMQ (Request-Reply) closed.");

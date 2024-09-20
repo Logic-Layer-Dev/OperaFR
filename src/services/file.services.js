@@ -19,7 +19,7 @@ class FileServices {
 
     if (!filename) return defaultResponse(400, `File is required`, null);
     if (!logic_path) return defaultResponse(400, `Folder is required`, null);
-    if (!(await checkFolderPermission(file.id, logic_path, "insert_file")))
+    if (!(await checkFolderPermission(req.id, logic_path, "insert_file")))
       return defaultResponse(401, `Unauthorized`, null);
     let folder_exists = await prisma.folder.findFirst({
       where: {

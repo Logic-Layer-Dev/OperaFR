@@ -18,7 +18,7 @@
 
             <!-- RootFolders -->
             <div class="flex flex-col gap-2 font-bold text-xl mt-6 p-2">
-                <p>Wellcome, Carlos! Exit?</p>
+                <p>Wellcome! <a class="hover:underline underline-offset-1 cursor-pointer" onclick="logout()">Exit?</a></p>
 
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-folder"></i>
@@ -103,8 +103,19 @@
     </div>
 </body>
 <script>
+    async function logout() {
+        localStorage.removeItem('authtoken');
+        window.location.href = '/dashboard/login';
+    }
+
     async function initCall() {
         let folders = await callFolder('root')
+        
+        if(!folders){
+            const serverIp = `<%= serverIp %>`;
+            window.location.href = `${serverIp}/dashboard/login`
+        }
+
         return folders
     }
 
@@ -136,7 +147,7 @@
 
     function getHeaders() {
         return {
-            'authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJjYXJsb3NnaW9uZ28iLCJpYXQiOjE3MjY4Njc3MjIsImV4cCI6MTcyNjg5NjUyMn0.LshTJicRp3bZdSwZ4bBlDttJoFxlbhLxsuG60LKAH-c'
+            'authorization': localStorage.getItem('authtoken')
         }
     }
 

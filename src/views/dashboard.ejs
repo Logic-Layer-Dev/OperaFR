@@ -125,7 +125,7 @@
     
     async function callFolder(folder_id) {
         let full_string = folder_id === 'root' ? 'parent_id=null' : `parent_id=${folder_id}` 
-
+        
         let response = await fetch(`http://localhost:2111/folders?${full_string}`, {
             method: 'GET',
             headers: getHeaders()

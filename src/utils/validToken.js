@@ -6,7 +6,6 @@ const prisma = require("../../config/prisma.config");
 
 module.exports = async (token) => {
   if (!token) {
-    console.log("Token not send.");
     return defaultResponse(401, "Token not send.", null);
   }
 
@@ -23,15 +22,11 @@ module.exports = async (token) => {
     let limit = is_api_token.api_expires_at;
     let now = new Date();
 
-    console.log("Limit:", limit);
     if (now > limit) return defaultResponse(401, "Token expired.", null);
   }
 
   return new Promise((resolve, reject) => {
     jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
-      console.log("Decoded:", decoded);
-      console.log("Error:", err);
-
       if (err) {
         reject(defaultResponse(401, "Token not valid (1).", null));
       } else {

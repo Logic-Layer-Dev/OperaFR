@@ -1,4 +1,4 @@
-const operaUploaderLib = require("operafs");
+const operaUploaderLib = require("operafr");
 
 async function main() {
     const operaUploader = await operaUploaderLib.instantiate({
@@ -8,12 +8,12 @@ async function main() {
         publishPort: 5556,
     })
 
-    const initialParams = await operaUploader.allocate("package.json", { 
+    const initialParams = await operaUploader.allocate("<filepath>", { 
         publicUrl: false,
-        folderId: 4
+        folderId: 4 // Example folderId
     });
 
-    await operaUploader.upload(initialParams.systemFilename, "package.json");
+    await operaUploader.upload(initialParams.systemFilename, "<filepath>", {chunckSize: (1024 * 1024) * 4}); // 4MB example
 }
 
 main();

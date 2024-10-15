@@ -10,8 +10,8 @@ const uploadsDir = "uploads";
 const runZeroMqTopic = async () => {
   try {
     const sock = new zmq.Pull();
-
-    sock.connect(`tcp://localhost:${process.env.ZMQ_PUSH_PORT}`);
+    await sock.bind(`tcp://*:${process.env.ZMQ_PUSH_PORT}`);
+    
     console.log(
       `ZeroMQ server (Publisher-Subscriber) listening on port ${process.env.ZMQ_PUSH_PORT}...`
     );

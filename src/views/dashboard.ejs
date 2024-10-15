@@ -103,6 +103,8 @@
     </div>
 </body>
 <script>
+    const serverIp = `<%= serverIp %>`;
+
     async function logout() {
         localStorage.removeItem('authtoken');
         window.location.href = '/dashboard/login';
@@ -112,7 +114,6 @@
         let folders = await callFolder('root')
         
         if(!folders){
-            const serverIp = `<%= serverIp %>`;
             window.location.href = `${serverIp}/dashboard/login`
         }
 
@@ -126,7 +127,7 @@
     async function callFolder(folder_id) {
         let full_string = folder_id === 'root' ? 'parent_id=null' : `parent_id=${folder_id}` 
         
-        let response = await fetch(`http://localhost:2111/folders?${full_string}`, {
+        let response = await fetch(`${serverIp}/folders?${full_string}`, {
             method: 'GET',
             headers: getHeaders()
         })
@@ -136,7 +137,7 @@
     }
 
     async function callFiles(folder_id) {
-        let response = await fetch(`http://localhost:2111/files?folder_id=${folder_id}`, {
+        let response = await fetch(`${serverIp}/files?folder_id=${folder_id}`, {
             method: 'GET',
             headers: getHeaders()
         })
@@ -175,7 +176,7 @@
 
     async function renderFile(file_id) {
         try {
-            let response = await fetch(`http://localhost:2111/files?file_id=${file_id}&render=true`, {
+            let response = await fetch(`${serverIp}/files?file_id=${file_id}&render=true`, {
                 method: 'GET',
                 headers: getHeaders()
             });

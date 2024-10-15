@@ -108,15 +108,11 @@ class FileServices {
     } = req.query;
 
     if (!file_id && !file_name && !folder_id)
-      return res
-        .status(400)
-        .json(
-          defaultResponse(
-            400,
-            `file_id, file_name or folder_id is required`,
-            null
-          )
-        );
+      return defaultResponse(
+        400,
+        `file_id, file_name or folder_id is required`,
+        null
+      );
 
     if (folder_id && file_name) {
       let file = await prisma.file.findFirst({
@@ -130,10 +126,7 @@ class FileServices {
         },
       });
 
-      if (!file)
-        return res
-          .status(404)
-          .json(defaultResponse(404, `File not found`, null));
+      if (!file) return defaultResponse(404, `File not found`, null);
 
       if (render) {
         const file_path = path.join(
@@ -144,9 +137,9 @@ class FileServices {
           file.path
         );
 
-        return res.sendFile(file_path);
+        return file_path;
       } else {
-        return res.status(200).json(defaultResponse(200, `File found`, file));
+        return defaultResponse(200, `File found`, file);
       }
     }
 
@@ -157,10 +150,7 @@ class FileServices {
         },
       });
 
-      if (!file)
-        return res
-          .status(404)
-          .json(defaultResponse(404, `File not found`, null));
+      if (!file) return defaultResponse(404, `File not found`, null);
 
       if (render) {
         const file_path = path.join(
@@ -259,59 +249,55 @@ class FileServices {
   }
 
   async createPublicUrl(req) {
-    let {
-        file_id = null
-    } = req.body
+    let { file_id = null } = req.body;
 
-    if(!file_id) return defaultResponse(400, `file_id is required`, null)
+    if (!file_id) return defaultResponse(400, `file_id is required`, null);
 
     let file = await prisma.file.findFirst({
-        where: {
-            id: parseInt(file_id)
-        }
-    })
+      where: {
+        id: parseInt(file_id),
+      },
+    });
 
-    if(!file) return defaultResponse(404, `File not found`, null)
+    if (!file) return defaultResponse(404, `File not found`, null);
 
-    let public_url = sha256(Date.now().toString() + "_" + file.name)
+    let public_url = sha256(Date.now().toString() + "_" + file.name);
 
     let file_update = await prisma.file.update({
-        where: {
-            id: parseInt(file_id)
-        },
-        data: {
-            public_url: public_url
-        }
-    })
+      where: {
+        id: parseInt(file_id),
+      },
+      data: {
+        public_url: public_url,
+      },
+    });
 
-    return defaultResponse(200, `Public url created`, file_update)
+    return defaultResponse(200, `Public url created`, file_update);
   }
 
   async deletePublicUrl(req) {
-    let {
-        file_id = null
-    } = req.body
+    let { file_id = null } = req.body;
 
-    if(!file_id) return defaultResponse(400, `file_id is required`, null)
+    if (!file_id) return defaultResponse(400, `file_id is required`, null);
 
     let file = await prisma.file.findFirst({
-        where: {
-            id: parseInt(file_id)
-        }
-    })
+      where: {
+        id: parseInt(file_id),
+      },
+    });
 
-    if(!file) return defaultResponse(404, `File not found`, null)
+    if (!file) return defaultResponse(404, `File not found`, null);
 
     let file_update = await prisma.file.update({
-        where: {
-            id: parseInt(file_id)
-        },
-        data: {
-            public_url: ""
-        }
-    })
+      where: {
+        id: parseInt(file_id),
+      },
+      data: {
+        public_url: "",
+      },
+    });
 
-    return defaultResponse(200, `Public url deleted`, file_update)
+    return defaultResponse(200, `Public url deleted`, file_update);
   }
 }
 

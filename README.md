@@ -31,12 +31,22 @@ This project can be installed by cloning this repository on your current server 
 ```
 #### 3. Create de .env File based on .env.example
 ```shell 
-  PORT=2111 
-  MAX_FILE_SIZE=5 
-  DATABASE_URL="postgresql://postgres:root@localhost:5432/operafr?schema=public"      
-  JWT_SECRET="operafr" 
-  CORS=["http://localhost"] 
-  VALID_ORIGIN_PUBLIC_URL=["*"] 
+  PORT=2111 #port to listen on
+  MAX_FILE_SIZE=10 #MB
+  DATABASE_URL="postgresql://postgres:root@localhost:5432/operafr?schema=public" #database url
+  JWT_SECRET="operafr" #jwt secret
+  CORS=["http://localhost"] #cors origin
+
+  #Validation rules for servers
+  VALID_ORIGIN_PUBLIC_URL=["*"] #valid ip to access public url of files. * for all
+  VALID_SENDER_IPS=["*"] #valid ip to send files. * for all
+
+  #ZeroMQ configuration
+  ZMQ_REPLY_PORT=5555 #port for req-rep
+  ZMQ_PUSH_PORT=5556 #port to pull-push
+
+  #Current server ip
+  SERVER_IP="http://localhost:2111" #You can put a DNS/Domain here if you have one linked to the server
 ```
 You may want to change: 
 
@@ -46,6 +56,10 @@ You may want to change:
 - **JWT_SECRET**: The auth secret. **(CHANGE THIS!)**
 - **CORS**: Insert the authorized domains for make requests to server
 - **VALID_ORIGIN_PUBLIC_URL**: If you want to authorize only some domain to get the files
+- **VALID_SENDER_IPS**: If you want to authorize only some IP to send the files
+- **ZMQ_REPLY_PORT**: Port for Req/Reply service
+- **ZMQ_PUSH_PORT**: Port for Push/Pull service
+- **SERVER_IP**: URL of the server 
 
 #### 4. Generate the prisma client
 ```shell

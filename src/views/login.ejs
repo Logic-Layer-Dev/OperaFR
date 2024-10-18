@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OperaFS - Dashboard Login</title>
+    <%- include('header') %>
+</head>
+<body class="flex justify-center">
+    <div class="border-solid border-2 rounded-md p-12 mt-24">
+        <div class="font-bold text-2xl">
+            <h1>Login - Dashboard OperaFS</h1>
+        </div>
+        <div>
+            <div class="mt-12" x-data="{ message: null }">
+                <input type="text" id="username" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Username" />
+                <input type="password" id="pass" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mt-4" placeholder="Senha" />
+                <button @click="
+                    message = login();
+                " type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mt-4 w-full" >Login</button>
+                <p x-text="message" class="text-red-500 mt-4"></p>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    async function login(){
+        const username = document.getElementById('username').value;
+        const pass = document.getElementById('pass').value;
+        const serverIp = `<%= serverIp %>`;
+
+        //Fetch /login endpoint
+        let request = await fetch(`${serverIp}/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: pass
+            })
+        })
+
+        //Handle response
+        let response = await request.json();
+        
+        if(response.status == '200'){
+            localStorage.setItem('authtoken', response.content.token);
+            window.location.href = '/dashboard';
+        }
+
+        return 'User or password incorrect';
+    }
+</script>
+<style>
+    body{
+        background-color: #161616;
+        color: white;
+    }
+</style>
+</html>

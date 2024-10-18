@@ -4,4 +4,5 @@ module.exports = function(app) {
     require('./user.routes')(app)
     require('./auth.routes')(app)
     require('./folder.routes')(app)
+    require('./dashboard.routes')(app)
 }

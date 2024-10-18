@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OperaFS - Dashboard</title>
+    <%- include('header') %>
+</head>
+<body>
+    <div x-data="{folders: [], files: [], stack: [{id: 'root', name: 'root'}]}" class="grid grid-cols-12">
+        <div class="col-span-2 p-2">
+            <!-- Seach files-->
+            <div>
+                <input type="text" id="search" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search any file..." />
+            </div>
+
+            <!-- RootFolders -->
+            <div class="flex flex-col gap-2 font-bold text-xl mt-6 p-2">
+                <p>Wellcome! <a class="hover:underline underline-offset-1 cursor-pointer" onclick="logout()">Exit?</a></p>
+
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-folder"></i>
+                    <p>Favourites</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-folder"></i>
+                    <p>Favourites</p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-folder"></i>
+                    <p>Favourites</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-10 p-2">
+            <div class="p-2 flex gap-3 text-xl">
+                <div class="cursor-pointer" @click="
+                async() => {
+                    stack.splice(stack.length - 1);
+                    folders = await callFolder(stack[stack.length - 1].id)
+                    files = await callFiles(stack[stack.length - 1].id)
+                }    
+                "><i class="fa-solid fa-arrow-left"></i></div>
+                <div class="cursor-pointer" @click="
+                async() => {
+                    folders = await callFolder(stack[stack.length - 1].id)
+                    files = await callFiles(stack[stack.length - 1].id)
+                }
+                ">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </div>
+            </div>
+
+            <div x-data="{}">
+                <h1 class="mt-8 font-bold text-xl">Path: 
+                    <template x-for="(item, index) in stack" :key="index">
+                        <span 
+                            x-text="item.name + ' / '" 
+                            @click="async() => {
+                                stack.splice(index + 1);
+                                folders = await callFolder(stack[stack.length - 1].id)
+                                files = await callFiles(stack[stack.length - 1].id)
+                            }"
+                            class="cursor-pointer hover:underline"
+                        ></span>
+                        <span x-show="index < stack.length - 1"> / </span> 
+                    </template>
+                </h1>
+                <div 
+                    class="flex flex-wrap gap-4 p-2 mt-6" 
+                    x-init="folders = await initCall()"
+                >   
+                    <!-- Show folders -->
+                    <template x-for="folder in folders" :key="folder.id">
+                        <div x-show="folders" @click="folders = await callFolder(folder.id); files = await callFiles(folder.id) ; stack = addStack(stack, folder.name, folder.id)" style="width: 204px;" class="flex flex-col gap-1 items-center py-4 px-12 border-solid rounded-md border-2 cursor-pointer hover:border-sky-500">
+                            <div style="font-size: 50px; color: #F9B919;">
+                                <i class="fa-solid fa-folder-closed"></i>
+                            </div>
+                            <div x-text="cutContent(folder.name)"></div>
+                        </div>
+                    </template>
+
+                    <!-- Show files -->
+                    <template x-for="file in files" :key="file.id">
+                        <div x-show="files" @click="renderFile(file.id)" style="width: 204px;" class="flex flex-col gap-1 items-center py-4 px-12 border-solid rounded-md border-2 cursor-pointer hover:border-sky-500">
+                            <div style="font-size: 50px;">
+                                <i x-show="!(fileTypes().includes(getExtension(file.name)))" style="color: red" class="fa-solid fa-file"></i>
+                                <i x-show="fileTypes('images').includes(getExtension(file.name))" style="color: green" class="fa-solid fa-image"></i>
+                                <i x-show="fileTypes('codes').includes(getExtension(file.name))" style="color: green" class="fa-solid fa-code"></i>
+                                <i x-show="fileTypes('videos').includes(getExtension(file.name))" style="color: green" class="fa-solid fa-video"></i>
+                                <i x-show="fileTypes('audios').includes(getExtension(file.name))" style="color: green" class="fa-solid fa-file-audio"></i>
+                            </div>
+                            <div x-text="cutContent(file.name)"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    const serverIp = `<%= serverIp %>`;
+
+    async function logout() {
+        localStorage.removeItem('authtoken');
+        window.location.href = '/dashboard/login';
+    }
+
+    async function initCall() {
+        let folders = await callFolder('root')
+        
+        if(!folders){
+            window.location.href = `${serverIp}/dashboard/login`
+        }
+
+        return folders
+    }
+
+    function addStack(stack, folderName, folderId) {
+        return [...stack, { id: folderId, name: folderName }];
+    }
+    
+    async function callFolder(folder_id) {
+        let full_string = folder_id === 'root' ? 'parent_id=null' : `parent_id=${folder_id}` 
+        
+        let response = await fetch(`${serverIp}/folders?${full_string}`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+        
+        let data = await response.json()
+        return data.content
+    }
+
+    async function callFiles(folder_id) {
+        let response = await fetch(`${serverIp}/files?folder_id=${folder_id}`, {
+            method: 'GET',
+            headers: getHeaders()
+        })
+        
+        let data = await response.json()
+        return data.content
+    }
+
+    function getHeaders() {
+        return {
+            'authorization': localStorage.getItem('authtoken')
+        }
+    }
+
+    function cutContent(content) {
+        return content.length > 24 ? content.substring(0, 21) + '...' : content
+    }
+
+    function getExtension(file) {
+        return file.split('.').pop()
+    }
+
+    function fileTypes(param = null) {
+        let images_array = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp']
+        let codes = ['json', 'xml', 'md', 'txt']
+        let videos_array = ['mp4', 'avi', 'mkv']
+        let audios_array = ['mp3', 'wav', 'flac', 'ogg']
+
+        if (param == 'images') return images_array
+        if (param == 'codes') return codes
+        if (param == 'videos') return videos_array
+        if (param == 'audios') return audios_array
+        
+        return images_array.concat(codes, videos_array, audios_array)
+    }
+
+    async function renderFile(file_id) {
+        try {
+            let response = await fetch(`${serverIp}/files?file_id=${file_id}&render=true`, {
+                method: 'GET',
+                headers: getHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`Error fetching file: ${response.status} ${response.statusText}`);
+            }
+
+            const buffer = await response.arrayBuffer();
+            const base64Data = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+            const dataUrl = `data:${response.headers.get('Content-Type') || 'text/plain'};base64,${base64Data}`;
+            window.open(dataUrl, '_blank');
+
+        } catch (error) {
+            console.error('Error rendering file:', error);
+        }
+    }
+</script>
+<style>
+    body{
+        background-color: #161616;
+        color: white;
+    }
+</style>
+</html>

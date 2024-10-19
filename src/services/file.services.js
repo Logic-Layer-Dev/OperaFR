@@ -9,6 +9,7 @@ const removeFile = require("../utils/removeFile");
 const sha256 = require("sha256");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 class FileServices {
   async uploadFile(req) {
@@ -82,10 +83,12 @@ class FileServices {
       !valid_origins.includes(req.ip) &&
       !valid_origins.includes(req.headers.host) &&
       !valid_origins.includes("*")
-    )
+    ) {
       return defaultResponse(401, `Unauthorized`, null);
+    }
 
     let hash = req.params.hash;
+    let render_hash = req.query.hash === "true";
 
     let file = await prisma.file.findFirst({
       where: {
@@ -96,6 +99,16 @@ class FileServices {
     if (!file) return defaultResponse(404, `File not found`, null);
 
     const file_path = path.join(__dirname, "..", "..", "uploads", file.path);
+
+    if (render_hash) {
+      const fileContent = fs.readFileSync(file_path);
+      const hash = crypto
+        .createHash("sha256")
+        .update(fileContent)
+        .digest("hex");
+      return defaultResponse(200, `Hash of file`, hash);
+    }
+
     return file_path;
   }
 

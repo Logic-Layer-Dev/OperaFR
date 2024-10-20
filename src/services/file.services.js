@@ -259,6 +259,30 @@ class FileServices {
 
       return defaultResponse(200, `File deleted`, delete_file);
     }
+
+    if(folder_id) {
+      const files = await prisma.file.findMany({
+        where: {
+          folderId: parseInt(folder_id),
+        },
+      });
+
+      if (!files) return defaultResponse(404, `Files not found in this folder`, null);
+
+      const delete_files = await prisma.file.deleteMany({
+        where: {
+          folderId: parseInt(folder_id),
+        },
+      });
+
+      files.forEach((file) => {
+        removeFile(file.path);
+      });
+
+      return defaultResponse(200, `Files deleted`, delete_files);
+    }
+
+    return defaultResponse(400, `You need to use file_name and folder_id`, null);
   }
 
   async createPublicUrl(req) {

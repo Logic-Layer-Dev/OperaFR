@@ -4,7 +4,8 @@
   "description": "Binary file management system",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "token": "node scripts/generate-token-cli.js"
   },
   "author": "Carlos Giongo",
   "repository": {
